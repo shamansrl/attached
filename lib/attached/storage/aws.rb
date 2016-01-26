@@ -6,6 +6,7 @@ module Attached
     class AWS < Fog
 
       attr_reader :bucket
+      attr_reader :region
       attr_reader :access_key_id
       attr_reader :secret_access_key
 
@@ -20,6 +21,7 @@ module Attached
         super
         credentials = parse(credentials)
         @bucket            = credentials[:bucket]            || credentials['bucket']
+        @region            = credentials[:region]            || credentials['region']
         @access_key_id     = credentials[:access_key_id]     || credentials['access_key_id']
         @secret_access_key = credentials[:secret_access_key] || credentials['secret_access_key']
         raise "'bucket' must be specified if using 'aws' for storage" unless @bucket
@@ -32,7 +34,7 @@ module Attached
       #   storage.host
 
       def host()
-        "https://#{self.bucket}.s3.amazonaws.com/"
+        "https://#{self.bucket}.s3-#{self.region}.amazonaws.com/"
       end
 
     private
@@ -45,7 +47,8 @@ module Attached
         @connection ||= ::Fog::Storage.new(
           aws_secret_access_key: self.secret_access_key,
           aws_access_key_id: self.access_key_id,
-          provider: 'AWS'
+          provider: 'AWS',
+          region: self.region
         )
       end
 
